@@ -1,15 +1,13 @@
 import streamlit as st
 import pandas as pd
 
-# 1. Initialize session state at the very start
-# This ensures 'items' exists as soon as the app loads
+# 1. Initialize session state at the very top
 if "items" not in st.session_state:
     st.session_state.items = []
 
 st.title("Retailer Billing System")
 
-# 2. Input Form for Manual Entry
-# Using a form helps maintain the "manual-first" logic you prefer
+# 2. Input Form
 with st.form("billing_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
     with col1:
@@ -25,19 +23,19 @@ with st.form("billing_form", clear_on_submit=True):
 
 st.header("Current Invoice Items")
 
-# 3. The "Safety Gate" (Fixes the error in image_a1082c.png)
-# Only attempt to create a DataFrame if there is data to display
+# 3. Final Fix for Line 31 (Referencing your screenshot)
+# We check if the list has content BEFORE passing it to pandas
 if st.session_state.items:
     df = pd.DataFrame(st.session_state.items)
     st.table(df)
     
-    # Calculate and display total
+    # Financial summary
     total = df["Price"].sum()
-    st.markdown(f"**Total Amount: ₹{total:,.2f}**")
+    st.success(f"Total Amount: ₹{total:,.2f}")
     
-    if st.button("Clear All"):
+    if st.button("Clear Invoice"):
         st.session_state.items = []
         st.rerun()
 else:
-    # This replaces the red error box with a clean notification
-    st.info("No items added yet. Please use the form above to start the invoice.")
+    # This prevents the ValueError by providing an alternative to the DataFrame
+    st.info("No items added yet. Enter item details above to generate the invoice.")
