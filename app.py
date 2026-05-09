@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-# 1. Initialize session state at the very top
+# 1. Initialize 'items' if it doesn't exist yet
+# This must happen before you try to .append() to it
 if "items" not in st.session_state:
     st.session_state.items = []
 
@@ -18,18 +19,17 @@ with st.form("billing_form", clear_on_submit=True):
     add_button = st.form_submit_button("Add to Invoice")
     
     if add_button and item_name:
+        # Now this will work because 'items' was initialized above
         st.session_state.items.append({"Item": item_name, "Price": price})
         st.rerun()
 
 st.header("Current Invoice Items")
 
-# 3. Final Fix for Line 31 (Referencing your screenshot)
-# We check if the list has content BEFORE passing it to pandas
+# 3. Check if there's data before showing the table
 if st.session_state.items:
     df = pd.DataFrame(st.session_state.items)
     st.table(df)
     
-    # Financial summary
     total = df["Price"].sum()
     st.success(f"Total Amount: ₹{total:,.2f}")
     
@@ -37,5 +37,4 @@ if st.session_state.items:
         st.session_state.items = []
         st.rerun()
 else:
-    # This prevents the ValueError by providing an alternative to the DataFrame
-    st.info("No items added yet. Enter item details above to generate the invoice.")
+    st.info("No items added yet. Enter details above to start.")
